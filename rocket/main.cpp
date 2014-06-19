@@ -288,3 +288,211 @@ void DrawGround(HWND hWnd)
 	}
 }
 
+
+void checkRect(RECT* r)
+{
+	int iW = r->right - r->left;
+	int iH = r->bottom - r->top;
+
+	if(r->top < fY0)
+		r->top = fY0;
+	else if(r->top > gY - rHeight)
+		r->top = gY - rHeight;
+
+	if(r->left < fX0)
+		r->left = fX0;
+	else if(r->left > fWidth - rWidth + fX0)
+		r->left = fWidth - rWidth + fX0;
+
+	r->right = r->left + iW;
+	r->bottom = r->top + iH;
+}
+
+void DrawRocket(HWND hWnd, int fuel, int x_engine, int y_engine, RECT cur_pos)
+{
+	checkRect(&cur_pos);
+
+	MoveWindow(hRocket, cur_pos.left, cur_pos.top, rWidth, rHeight, TRUE);
+	
+	int iFireL = 0;
+	int iFireR = 0;
+	int iFireD = 0;
+
+	if(fuel != 0 && cur_pos.bottom < gY)
+	{
+		if(y_engine > 0) 
+			iFireD = (y_engine / 34) + 1;
+
+		if(x_engine > 0)
+			iFireR = (x_engine / 34) + 1;
+		else if(x_engine < 0)
+			iFireL = (abs(x_engine) / 34) + 1;
+
+
+	}
+
+	DrawFireLeft(hWnd, iFireL, cur_pos);
+	DrawFireRight(hWnd, iFireR, cur_pos);
+	DrawFireDown(hWnd, iFireD, cur_pos);
+}
+
+void DrawFireLeft(HWND hWnd, int p, RECT cur_pos)
+{
+	int const imgW[3] = {10, 18, 30};
+	int const imgH[3] = {14, 14, 14};
+	LPCWSTR const IMGS[3] = {MAKEINTRESOURCE(FIRE_LEFT1), MAKEINTRESOURCE(FIRE_LEFT2), MAKEINTRESOURCE(FIRE_LEFT3)};
+
+	if(hFireLeft[0] == 0)
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			hFireLeft[i] = CreateWindowEx(0, TEXT("STATIC"), 0, WS_CHILD | SS_BITMAP , 0, 0, imgW[i], imgH[i], hWnd, 0, GetModuleHandle(0), 0);
+			HBITMAP fireBMP;			
+			fireBMP = LoadBitmap(GetModuleHandle(0), IMGS[i]);
+			SendMessage(hFireLeft[i], STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)fireBMP);
+		}
+	}
+
+	for(int i = 0; i < 3; i++)
+	{
+		if(i != p-1 && IsWindowVisible(hFireLeft[i]) == TRUE)
+			ShowWindow(hFireLeft[i], SW_HIDE);
+	}
+
+	if(p == 0)
+		return;
+
+	if(IsWindowVisible(hFireLeft[p-1]) == FALSE)
+		ShowWindow(hFireLeft[p-1], SW_SHOW);
+
+	MoveWindow(hFireLeft[p-1], cur_pos.left - imgW[p-1], cur_pos.bottom - 11, imgW[p-1], imgH[p-1], TRUE);
+}
+
+void DrawFireRight(HWND hWnd, int p, RECT cur_pos)
+{
+	int const imgW[3] = {10, 18, 30};
+	int const imgH[3] = {14, 14, 14};
+	LPCWSTR const IMGS[3] = {MAKEINTRESOURCE(FIRE_RIGHT1), MAKEINTRESOURCE(FIRE_RIGHT2), MAKEINTRESOURCE(FIRE_RIGHT3)};
+
+	if(hFireRight[0] == 0)
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			hFireRight[i] = CreateWindowEx(0, TEXT("STATIC"), 0, WS_CHILD | SS_BITMAP , 0, 0, imgW[i], imgH[i], hWnd, 0, GetModuleHandle(0), 0);
+			HBITMAP fireBMP;			
+			fireBMP = LoadBitmap(GetModuleHandle(0), IMGS[i]);
+			SendMessage(hFireRight[i], STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)fireBMP);
+		}
+	}
+
+	for(int i = 0; i < 3; i++)
+	{
+		if(i != p-1 && IsWindowVisible(hFireRight[i]) == TRUE)
+			ShowWindow(hFireRight[i], SW_HIDE);
+	}
+
+	if(p == 0)
+		return;
+
+	if(IsWindowVisible(hFireRight[p-1]) == FALSE)
+		ShowWindow(hFireRight[p-1], SW_SHOW);
+
+	MoveWindow(hFireRight[p-1], cur_pos.right, cur_pos.bottom - 11, imgW[p-1], imgH[p-1], TRUE);
+}
+
+void DrawFireDown(HWND hWnd, int p, RECT cur_pos)
+{
+	int const imgH[3] = {10, 18, 30};
+	int const imgW[3] = {14, 14, 14};
+	LPCWSTR const IMGS[3] = {MAKEINTRESOURCE(FIRE_DOWN1), MAKEINTRESOURCE(FIRE_DOWN2), MAKEINTRESOURCE(FIRE_DOWN3)};
+
+	if(hFireDown[0] == 0)
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			hFireDown[i] = CreateWindowEx(0, TEXT("STATIC"), 0, WS_CHILD | SS_BITMAP , 0, 0, imgW[i], imgH[i], hWnd, 0, GetModuleHandle(0), 0);
+			HBITMAP fireBMP;			
+			fireBMP = LoadBitmap(GetModuleHandle(0), IMGS[i]);
+			SendMessage(hFireDown[i], STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)fireBMP);
+		}
+	}
+
+	for(int i = 0; i < 3; i++)
+	{
+		if(i != p-1 && IsWindowVisible(hFireDown[i]) == TRUE)
+			ShowWindow(hFireDown[i], SW_HIDE);
+	}
+
+	if(p == 0)
+		return;
+
+	if(IsWindowVisible(hFireDown[p-1]) == FALSE)
+		ShowWindow(hFireDown[p-1], SW_SHOW);
+
+	MoveWindow(hFireDown[p-1], cur_pos.left + 8, cur_pos.bottom, imgW[p-1], imgH[p-1], TRUE);
+}
+
+void ChangeRocketView(int t)
+{
+	if(t == 2)
+	{
+		HICON rocketIcom= LoadIcon(GetModuleHandle(0), MAKEINTRESOURCE(IDI_BROKEN));
+		SendMessage(hRocket, STM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)rocketIcom);
+		UpdateWindow(hRocket);
+	} else if(t == 3) {
+		HICON rocketIcom= LoadIcon(GetModuleHandle(0), MAKEINTRESOURCE(IDI_EXPLOSION));
+		SendMessage(hRocket, STM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)rocketIcom);
+		UpdateWindow(hRocket);
+	} else {
+		HICON rocketIcom= LoadIcon(GetModuleHandle(0), MAKEINTRESOURCE(IDI_ROCKET));
+		SendMessage(hRocket, STM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)rocketIcom);
+		UpdateWindow(hRocket);
+	}
+}
+
+int isLanded(RECT r, int speed)
+{
+	bool landed = r.bottom >= gY;
+
+	if(landed)
+	{
+		bool onGoodGround = true;
+		for(int i = r.left + 2; i < r.right - 2; i++)
+		{
+			int iGroundIndx = (i - fY0) / gWidth;
+			if(iGroundIndx >= gSize || groundArr[iGroundIndx] != 0)
+			{
+				onGoodGround = false;
+				break;
+			}
+
+			if(!onGoodGround)
+				break;
+		}
+
+		if(!onGoodGround)
+		{
+			lives--;
+			TCHAR tlives[12];
+			wsprintf(tlives, TEXT("lives: %d "), lives);
+			SendMessage(hStatus, SB_SETTEXT, 1, (LPARAM) tlives);
+			return 3;
+		}
+
+		if(speed > iMaxLandingSpeed)
+		{
+			lives--;
+			TCHAR tlives[12];
+			wsprintf(tlives, TEXT("lives: %d "), lives);
+			SendMessage(hStatus, SB_SETTEXT, 1, (LPARAM) tlives);
+			return 2; 
+		}
+		else
+		{
+			return 1;
+		}
+	}
+
+
+	return 0;
+}
